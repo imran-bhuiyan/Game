@@ -37,6 +37,8 @@ void init_game() {
     // Initialize game state
     g_state.computer_arrow = -1;  // Outside grid
     g_state.player_arrow = -1;    // Outside grid
+    g_state.computer_last_value = 0;  // Initialize last chosen values
+    g_state.player_last_value = 0;
     g_state.current_player = COMPUTER;
     g_state.game_over = 0;
     g_state.winner = EMPTY;
@@ -60,7 +62,6 @@ void display_board() {
     attroff(COLOR_PAIR(1) | A_BOLD);
     
     // Grid 2 (Multiplier grid) - Top arrow (Computer)
-    //mvprintw(2, 10, "Computer Arrow:");
     for (int i = 0; i < GRID2_SIZE; i++) {
         if (g_state.computer_arrow == i) {
             attron(COLOR_PAIR(2) | A_BOLD);
@@ -78,7 +79,6 @@ void display_board() {
     }
     
     // Grid 2 - Bottom arrow (Player)
-    //mvprintw(5, 10, "Player Arrow:");
     for (int i = 0; i < GRID2_SIZE; i++) {
         if (g_state.player_arrow == i) {
             attron(COLOR_PAIR(3) | A_BOLD);
@@ -132,10 +132,9 @@ void display_board() {
              g_state.computer_score, g_state.player_score);
     mvprintw(19, 10, "Move Count: %d", g_state.move_count);
     
-    // Previous choices
+    // Previous choices - Show the actual values chosen by each player
     mvprintw(20, 10, "Previous Choices - Computer: %d, Player: %d", 
-             g_state.computer_arrow >= 0 ? g_board.grid2[g_state.computer_arrow] : 0,
-             g_state.player_arrow >= 0 ? g_board.grid2[g_state.player_arrow] : 0);
+             g_state.computer_last_value, g_state.player_last_value);
     
     if (g_state.current_player == COMPUTER) {
         attron(COLOR_PAIR(2));
@@ -288,6 +287,7 @@ void computer_move() {
     // If no arrows are set, set computer arrow
     if (g_state.computer_arrow < 0 && g_state.player_arrow < 0) {
         g_state.computer_arrow = rand() % GRID2_SIZE;
+        g_state.computer_last_value = g_board.grid2[g_state.computer_arrow];
         g_state.current_player = PLAYER;
         return;
     }
@@ -295,8 +295,10 @@ void computer_move() {
     // Apply best move
     if (best_move_type == 0) {
         g_state.computer_arrow = best_comp_pos;
+        g_state.computer_last_value = g_board.grid2[best_comp_pos];
     } else {
         g_state.player_arrow = best_player_pos;
+        g_state.computer_last_value = g_board.grid2[best_player_pos];
     }
     
     // Calculate and mark result
@@ -322,22 +324,30 @@ void handle_player_input(int ch) {
     static int choosing_arrow = 1; // 1: choose which arrow to change, 0: choose value for that arrow
     static int arrow_to_change = -1; // 0: computer, 1: player
 
+    // Handle global controls first, regardless of game state
+    switch (ch) {
+        case 'q':
+        case 'Q':
+            endwin();
+            exit(0);
+            break;
+        case 'r':
+        case 'R':
+            init_game();
+            return;
+        case 's':
+        case 'S':
+            save_game_state();
+            mvprintw(24, 10, "Game saved!");
+            return;
+        case 'l':
+        case 'L':
+            load_game_state();
+            mvprintw(24, 10, "Game loaded!");
+            return;
+    }
+
     if (g_state.game_over) {
-        switch (ch) {
-            case 'q':
-            case 'Q':
-                exit(0);
-                break;
-            case 'r':
-            case 'R':
-                init_game();
-                break;
-            case 's':
-            case 'S':
-                save_game_state();
-                mvprintw(24, 10, "Game saved!");
-                break;
-        }
         return;
     }
 
@@ -360,8 +370,10 @@ void handle_player_input(int ch) {
                 selected_pos = ch - '1';
                 if (arrow_to_change == 0) {
                     g_state.computer_arrow = selected_pos;
+                    g_state.player_last_value = g_board.grid2[selected_pos];
                 } else if (arrow_to_change == 1) {
                     g_state.player_arrow = selected_pos;
+                    g_state.player_last_value = g_board.grid2[selected_pos];
                 }
                 // After changing one arrow, process the move
                 if (g_state.computer_arrow >= 0 && g_state.player_arrow >= 0) {
@@ -378,17 +390,6 @@ void handle_player_input(int ch) {
                 }
                 choosing_arrow = 1;
                 arrow_to_change = -1;
-                break;
-            case 'q': case 'Q':
-                exit(0);
-                break;
-            case 's': case 'S':
-                save_game_state();
-                mvprintw(24, 10, "Game saved!");
-                break;
-            case 'l': case 'L':
-                load_game_state();
-                mvprintw(24, 10, "Game loaded!");
                 break;
             default:
                 mvprintw(21, 10, "Select new value for %s arrow (1-9)",

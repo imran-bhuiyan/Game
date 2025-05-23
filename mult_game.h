@@ -18,6 +18,8 @@
 typedef struct {
     int computer_arrow;    // Position of computer arrow in Grid 2
     int player_arrow;      // Position of player arrow in Grid 2
+    int computer_last_value;  // Track computer's last chosen value
+    int player_last_value;    // Track player's last chosen value
     int current_player;    // Current player turn
     int game_over;         // Game over flag
     int winner;            // Winner of the game
