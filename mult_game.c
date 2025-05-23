@@ -327,7 +327,7 @@ void computer_move() {
 void handle_player_input(int ch) {
     static int selected_pos = 0;
     static int choosing_arrow = 1; // 1: choose which arrow to change, 0: choose value for that arrow
-    static int arrow_to_change = 1; // Default to player's arrow (1), 0 for computer's arrow
+    static int arrow_to_change = -1; // 0: computer, 1: player
 
     // Handle global controls first, regardless of game state
     switch (ch) {
@@ -366,11 +366,12 @@ void handle_player_input(int ch) {
             arrow_to_change = 0;
             choosing_arrow = 0;
             mvprintw(21, 10, "Select new value for computer's (red) arrow (1-9)");
-        } else {
-            // Default to player's arrow for any other key
+        } else if (ch == 'p' || ch == 'P') {
             arrow_to_change = 1;
             choosing_arrow = 0;
             mvprintw(21, 10, "Select new value for your (blue) arrow (1-9)");
+        } else {
+            mvprintw(21, 10, "Which arrow do you want to change? (c = red/computer, p = blue/player)");
         }
     } else {
         switch (ch) {
@@ -398,7 +399,7 @@ void handle_player_input(int ch) {
                     }
                 }
                 choosing_arrow = 1;
-                arrow_to_change = 1; // Reset to default (player's arrow)
+                arrow_to_change = -1;
                 break;
             default:
                 mvprintw(21, 10, "Select new value for %s arrow (1-9)",
@@ -409,7 +410,7 @@ void handle_player_input(int ch) {
 
     // Show current selection or prompt
     if (choosing_arrow) {
-        mvprintw(21, 10, "Press 'c' to change computer's arrow, or any other key for your arrow");
+        mvprintw(21, 10, "Which arrow do you want to change? (c = red/computer, p = blue/player)");
     } else {
         mvprintw(21, 10, "Select new value for %s arrow (1-9)",
             arrow_to_change == 0 ? "computer's" : "your");
