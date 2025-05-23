@@ -56,9 +56,13 @@ void init_game() {
 void display_board() {
     clear();
     
+    // Get terminal width
+    int max_x;
+    getmaxyx(stdscr, max_x, max_x);
+    
     // Title
     attron(COLOR_PAIR(1) | A_BOLD);
-    mvprintw(0, 20, "MULTIPLICATION GAME");
+    mvprintw(0, (max_x - strlen("MULTIPLICATION GAME")) / 2, "MULTIPLICATION GAME");
     attroff(COLOR_PAIR(1) | A_BOLD);
     
     // Grid 2 (Multiplier grid) - Top arrow (Computer)
