@@ -142,14 +142,15 @@ void display_board() {
         attroff(COLOR_PAIR(2));
     } else {
         attron(COLOR_PAIR(3));
-        mvprintw(22, 10, "Your turn!");
-        mvprintw(23, 10, "First choose which arrow to move (c = red/computer, p = blue/player)");
-        mvprintw(24, 10, "Then select a value for that arrow (1-9)");
+        mvprintw(23, 10, "Your turn!");
+        mvprintw(24, 10, "First choose which arrow to move (c = red/computer, p = blue/player)");
+        mvprintw(25, 10, "Caution: You cannot change the computer's arrow before the first move!");
+        mvprintw(26, 10, "Then select a value for that arrow (1-9)");
         attroff(COLOR_PAIR(3));
     }
     
     // Always show controls at the bottom
-    mvprintw(26, 10, "Press 'q' to quit, 'r' to restart, 's' to save");
+    mvprintw(28, 10, "Press 'q' to quit, 'r' to restart, 's' to save, 'l' to load");
 
     if (g_state.game_over) {
         attron(COLOR_PAIR(1) | A_BOLD);
@@ -353,6 +354,11 @@ void handle_player_input(int ch) {
 
     if (choosing_arrow) {
         if (ch == 'c' || ch == 'C') {
+            // Prevent changing computer's arrow before first multiplication
+            if (g_state.move_count == 0) {
+                mvprintw(21, 10, "Cannot change computer's arrow before first move!");
+                return;
+            }
             arrow_to_change = 0;
             choosing_arrow = 0;
             mvprintw(21, 10, "Select new value for computer's (red) arrow (1-9)");
