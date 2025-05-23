@@ -130,40 +130,40 @@ void display_board() {
             printw("---+");
         }
     }
-    
+
     // Game status
-    mvprintw(18, 10, "Scores - Computer: %d, Player: %d", 
+    mvprintw(19, 10, "Scores - Computer: %d, Player: %d", 
              g_state.computer_score, g_state.player_score);
-    mvprintw(19, 10, "Move Count: %d", g_state.move_count);
+    mvprintw(20, 10, "Move Count: %d", g_state.move_count);
     
     // Previous choices - Show the actual values chosen by each player
-    mvprintw(20, 10, "Previous Choices - Computer: %d, Player: %d", 
+    mvprintw(21, 10, "Previous Choices - Computer: %d, Player: %d", 
              g_state.computer_last_value, g_state.player_last_value);
     
     if (g_state.current_player == COMPUTER) {
         attron(COLOR_PAIR(2));
-        mvprintw(22, 10, "Computer's turn...");
+        mvprintw(23, 10, "Computer's turn...");
         attroff(COLOR_PAIR(2));
     } else {
         attron(COLOR_PAIR(3));
-        mvprintw(23, 10, "Your turn!");
-        mvprintw(24, 10, "First choose which arrow to move (c = red/computer, p = blue/player)");
-        mvprintw(25, 10, "Caution: You cannot change the computer's arrow before the first move!");
-        mvprintw(26, 10, "Then select a value for that arrow (1-9)");
+        mvprintw(24, 10, "Your turn!");
+        mvprintw(25, 10, "First choose which arrow to move (c = red/computer, p = blue/player)");
+        mvprintw(26, 10, "Caution: You cannot change the computer's arrow before the first move!");
+        mvprintw(27, 10, "Then select a value for that arrow (1-9)");
         attroff(COLOR_PAIR(3));
     }
     
     // Always show controls at the bottom
-    mvprintw(28, 10, "Press 'q' to quit, 'r' to restart, 's' to save, 'l' to load");
+    mvprintw(29, 10, "Press 'q' to quit, 'r' to restart, 's' to save, 'l' to load");
 
     if (g_state.game_over) {
         attron(COLOR_PAIR(1) | A_BOLD);
         if (g_state.winner == COMPUTER) {
-            mvprintw(23, 10, "GAME OVER - Computer Wins!");
+            mvprintw(24, 10, "GAME OVER - Computer Wins!");
         } else if (g_state.winner == PLAYER) {
-            mvprintw(23, 10, "GAME OVER - You Win!");
+            mvprintw(24, 10, "GAME OVER - You Win!");
         } else {
-            mvprintw(23, 10, "GAME OVER - It's a Draw!");
+            mvprintw(24, 10, "GAME OVER - It's a Draw!");
         }
         attroff(COLOR_PAIR(1) | A_BOLD);
     }
@@ -327,7 +327,7 @@ void computer_move() {
 void handle_player_input(int ch) {
     static int selected_pos = 0;
     static int choosing_arrow = 1; // 1: choose which arrow to change, 0: choose value for that arrow
-    static int arrow_to_change = -1; // 0: computer, 1: player
+    static int arrow_to_change = 1; // Default to player's arrow (1), 0 for computer's arrow
 
     // Handle global controls first, regardless of game state
     switch (ch) {
@@ -366,12 +366,11 @@ void handle_player_input(int ch) {
             arrow_to_change = 0;
             choosing_arrow = 0;
             mvprintw(21, 10, "Select new value for computer's (red) arrow (1-9)");
-        } else if (ch == 'p' || ch == 'P') {
+        } else {
+            // Default to player's arrow for any other key
             arrow_to_change = 1;
             choosing_arrow = 0;
             mvprintw(21, 10, "Select new value for your (blue) arrow (1-9)");
-        } else {
-            mvprintw(21, 10, "Which arrow do you want to change? (c = red/computer, p = blue/player)");
         }
     } else {
         switch (ch) {
@@ -399,7 +398,7 @@ void handle_player_input(int ch) {
                     }
                 }
                 choosing_arrow = 1;
-                arrow_to_change = -1;
+                arrow_to_change = 1; // Reset to default (player's arrow)
                 break;
             default:
                 mvprintw(21, 10, "Select new value for %s arrow (1-9)",
@@ -410,7 +409,7 @@ void handle_player_input(int ch) {
 
     // Show current selection or prompt
     if (choosing_arrow) {
-        mvprintw(21, 10, "Which arrow do you want to change? (c = red/computer, p = blue/player)");
+        mvprintw(21, 10, "Press 'c' to change computer's arrow, or any other key for your arrow");
     } else {
         mvprintw(21, 10, "Select new value for %s arrow (1-9)",
             arrow_to_change == 0 ? "computer's" : "your");
